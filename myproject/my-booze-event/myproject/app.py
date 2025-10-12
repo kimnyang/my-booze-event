@@ -53,8 +53,12 @@ def price_simulator():
 
         time.sleep(UPDATE_SECONDS)
 
-if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port=8080)
+def start_tunnel():
+    try:
+        subprocess.Popen(["cloudflared", "tunnel", "--url", "http://localhost:8080"])
+    except Exception as e:
+        print("Cloudflare Tunnel 실행 오류:", e)
+
 # 서버 초기화
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     with lock:
