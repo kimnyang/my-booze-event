@@ -4,7 +4,6 @@ import random
 import threading
 import time
 import os
-import subprocess
 
 app = Flask(__name__)
 
@@ -15,10 +14,12 @@ lock = threading.Lock()
 
 UPDATE_SECONDS = 300  # 5분
 
+
 def is_market_open(now: datetime) -> bool:
     """장 운영 여부 확인 (17시 ~ 익일 0시59분)"""
     hour = now.hour
     return (17 <= hour <= 23) or (hour == 0)
+
 
 def price_simulator():
     global current_price, price_data, time_data
@@ -53,8 +54,7 @@ def price_simulator():
 
         time.sleep(UPDATE_SECONDS)
 
-if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port=8080)
+
 # 서버 초기화
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     with lock:
@@ -63,11 +63,12 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
             time_data.append(datetime.now().strftime("%H:%M"))
 
     threading.Thread(target=price_simulator, daemon=True).start()
-    threading.Thread(target=start_tunnel, daemon=True).start()
+
 
 @app.route('/')
 def index():
     return render_template('index.html')
+
 
 @app.route('/data')
 def get_data():
@@ -80,5 +81,8 @@ def get_data():
             'market_open': market_open
         })
 
+
 if __name__ == "__main__":
-    app.run(debug=False, host='0.0.0.0', port=8080)
+    # Render는 PORT 환경변수를 사용하므로 이렇게 수정
+    port = int(os.environ.get("PORT", 8080))
+    app.run(debug=False, host='0.0.0.0', port=port)
