@@ -38,8 +38,10 @@ button { border-radius: 20px !important; padding: 12px 20px !important; margin: 
         시선 B.C
         <span id="marketStatus" class="badge">장 마감</span>
       </h2>
+
+      <h4 class="currentPrice">현재가격: 5000원</h4>
+
       <div class="chart-container"><canvas id="chart" height="420"></canvas></div>
-      <span id="currentPrice">현재가격: 5000원</span>
 
       <div class="d-flex flex-wrap justify-content-center mt-3 align-items-center">
         <button id="btnLowest" class="btn btn-success me-3 mb-2"><i class="fas fa-arrow-down"></i> 오늘의 최저가</button>
@@ -122,16 +124,10 @@ document.addEventListener("DOMContentLoaded", function(){
     }
 
     // ===== 더미 데이터로 fetch 대체 =====
-    async function fetchData(){
-        try{
-            const json = {
-                timestamps: ["1","2","3","4","5","6","7","8","9","10"],
-                prices: [5000,4800,4700,4900,5000,5050,4950,5000,5020,4980],
-                market_open: true
-            };
+    async function fetchData()
 
-            if(firstLoad){
-                firstLoad=false;
+      if(firstLoad){
+        firstLoad=false;
                 timestamps = ["시작"].concat(json.timestamps);
                 prices = [5000].concat(json.prices);
             } else {
@@ -144,12 +140,10 @@ document.addEventListener("DOMContentLoaded", function(){
             currentPriceEl.textContent = "현재가격: " + latestPrice + "원";
 
             renderWindow();
-        } catch(e){ console.error(e); }
-    }
+         catch(e){ console.error(e); }
 
     setInterval(fetchData, 150000); // 5초마다 갱신
     fetchData();
-});
 
 // ===== 원판 돌리기 =====
 const canvas = document.getElementById("wheelCanvas");
