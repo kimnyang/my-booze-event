@@ -29,6 +29,7 @@ def is_market_open(now: datetime) -> bool:
 
 def price_simulator():
     global current_price, price_data, time_data
+    time.sleep(UPDATE_SECONDS)
     while True:
         now = now_kst()
         if is_market_open(now):
