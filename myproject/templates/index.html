@@ -8,7 +8,6 @@
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-/* ===== 기존 CSS 그대로 유지 ===== */
 body { font-family: 'Comic Sans MS', cursive, sans-serif; background: linear-gradient(135deg,#f9f9f9,#e6f7ff); color: #333; text-align: center; padding: 20px; min-height: 100vh; }
 .chart-title { color: #4a90e2; margin-bottom: 18px; }
 #marketStatus { background-color: #D62A2A; color: white; padding: 2px 8px; border-radius: 5px; font-size: 0.9em; margin-left: 10px; display: none; }
@@ -36,15 +35,11 @@ button { border-radius: 20px !important; padding: 12px 20px !important; margin: 
   <div class="tab-content mt-3">
     <div class="tab-pane fade show active" id="chartTab">
       <h2 class="chart-title mt-3">
-        시선 B.C (Booze Chart라는 뜻)
+        시선 B.C
         <span id="marketStatus" class="badge">장 마감</span>
       </h2>
-
-       <h4 class="currentPrice" style="margin-top: 4px; color: #333; font-weight: bold;">
-        현재가격: 5000원
-      </h4>
-      
       <div class="chart-container"><canvas id="chart" height="420"></canvas></div>
+      <span id="currentPrice">현재가격: 5000원</span>
 
       <div class="d-flex flex-wrap justify-content-center mt-3 align-items-center">
         <button id="btnLowest" class="btn btn-success me-3 mb-2"><i class="fas fa-arrow-down"></i> 오늘의 최저가</button>
@@ -73,7 +68,7 @@ button { border-radius: 20px !important; padding: 12px 20px !important; margin: 
           <div id="pointer" aria-hidden="true"></div>
           <canvas id="wheelCanvas" width="400" height="400"></canvas>
         </div>
-                <button class="btn btn-warning mt-3" onclick="spinWheel()">돌려! 🐶</button>
+        <button class="btn btn-warning mt-3" onclick="spinWheel()">돌려! 🐶</button>
         <h3 id="result" class="mt-3"></h3>
       </div>
     </div>
@@ -82,11 +77,9 @@ button { border-radius: 20px !important; padding: 12px 20px !important; margin: 
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-/* ===== 차트 초기화 및 실시간 업데이트 ===== */
 document.addEventListener("DOMContentLoaded", function(){
     const visiblePoints = 20, scrollStep = 10;
-    let scrollStart = 0;
-    let firstLoad = true;
+    let scrollStart = 0, firstLoad = true;
     let timestamps = ["시작"], prices = [5000];
 
     const ctxChart = document.getElementById('chart').getContext('2d');
@@ -128,19 +121,22 @@ document.addEventListener("DOMContentLoaded", function(){
         updateNavButtons();
     }
 
+    // ===== 더미 데이터로 fetch 대체 =====
     async function fetchData(){
         try{
-            const res = await fetch('/data');
-            if(!res.ok) return;
-            const json = await res.json();
+            const json = {
+                timestamps: ["1","2","3","4","5","6","7","8","9","10"],
+                prices: [5000,4800,4700,4900,5000,5050,4950,5000,5020,4980],
+                market_open: true
+            };
 
             if(firstLoad){
                 firstLoad=false;
-                timestamps = ["시작"].concat(json.timestamps || []);
-                prices = [5000].concat(json.prices || []);
+                timestamps = ["시작"].concat(json.timestamps);
+                prices = [5000].concat(json.prices);
             } else {
-                timestamps = Array.isArray(json.timestamps) ? json.timestamps.slice() : timestamps;
-                prices = Array.isArray(json.prices) ? json.prices.slice() : prices;
+                timestamps = json.timestamps.slice();
+                prices = json.prices.slice();
             }
 
             marketStatus.style.display = json.market_open ? "none" : "inline-block";
@@ -151,11 +147,11 @@ document.addEventListener("DOMContentLoaded", function(){
         } catch(e){ console.error(e); }
     }
 
-    setInterval(fetchData, 150000); // 5초마다 최신화
+    setInterval(fetchData, 150000); // 5초마다 갱신
     fetchData();
 });
 
-/* ===== 원판 돌리기 ===== */
+// ===== 원판 돌리기 =====
 const canvas = document.getElementById("wheelCanvas");
 const ctx = canvas.getContext("2d");
 let optionCount = 6, options = Array(optionCount).fill(""), startAngle = 0, spinning=false;
