@@ -12,7 +12,7 @@ body {
     margin-bottom: 18px;
 }
 
-#market-status {
+#marketStatus {
     background-color: #D62A2A;
     color: white;
     padding: 2px 8px;
@@ -20,6 +20,14 @@ body {
     font-size: 0.9em;
     margin-left: 10px;
     display: none;
+}
+
+#currentPrice {
+    display: block;
+    margin-top: 10px;
+    font-size: 1.1rem;
+    color:#333;
+    font-weight:bold;
 }
 
 .chart-container {
@@ -46,11 +54,18 @@ button {
     color: white;
     border: none;
     cursor: pointer;
-    transition: 0.2s;
+    transition: 0.15s;
 }
 
 button:hover {
-    transform: scale(1.05);
+    transform: scale(1.02);
+}
+
+.arrow-container button{
+    background: #4a90e2;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
 }
 
 @media (max-width: 576px){
@@ -60,8 +75,11 @@ button:hover {
     }
 }
 
-/* 돌림판 */
-#wheel {
-    transition: transform 4s ease-out;
-    margin-top: 10px;
-}
+/* 원판 섹션 */
+.wheel-container { width: 100%; max-width: 420px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 18px; position: relative; display: flex; flex-direction: column; align-items: center; }
+.wheel-visual { width: 100%; max-width: 380px; position: relative; margin-top: 8px; display: flex; justify-content: center; align-items: center; }
+#wheelCanvas { width: 100%; height: auto; display: block; border-radius: 12px; background: #fafafa; }
+#pointer { width: 0; height: 0; border-left: 18px solid transparent; border-right: 18px solid transparent; border-top: 28px solid red; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); z-index: 20; }
+.option-input { width: 48%; margin: 4px 1%; }
+.arrow-container { display: flex; justify-content: center; margin-top: 10px; gap: 10px; }
+.arrow-container button { padding: 10px 14px; }
