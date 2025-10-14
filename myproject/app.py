@@ -1,37 +1,29 @@
 from flask import Flask, render_template, jsonify
-from datetime import datetime, timedelta
+from datetime import datetime
 import random
 import threading
 import time
 import os
-
-KST = 9
-
-def now_kst():
-    """한국 시간 기준 현재 시각 변환"""
-    return datetime.utcnow() + timedelta(hours=KST)
+import subprocess
 
 app = Flask(__name__)
 
+# ===== 가격 데이터 & 동기화 =====
 price_data = []
 time_data = []
 current_price = 5000
 lock = threading.Lock()
-
 UPDATE_SECONDS = 300  # 5분
-
 
 def is_market_open(now: datetime) -> bool:
     """장 운영 여부 확인 (17시 ~ 익일 0시59분)"""
     hour = now.hour
     return (17 <= hour <= 23) or (hour == 0)
 
-
 def price_simulator():
     global current_price, price_data, time_data
-    time.sleep(UPDATE_SECONDS)
     while True:
-        now = now_kst()
+        now = datetime.now()
         if is_market_open(now):
             last_price = current_price
             # 가격 규칙
@@ -61,35 +53,35 @@ def price_simulator():
 
         time.sleep(UPDATE_SECONDS)
 
+def start_tunnel():
+    """Cloudflare Tunnel 자동 실행 (선택 사항)"""
+    try:
+        subprocess.Popen(["cloudflared", "tunnel", "--url", "http://localhost:8080"])
+    except Exception as e:
+        print("Cloudflare Tunnel 실행 오류:", e)
 
-# 서버 초기화
+# ===== 서버 초기화 =====
 if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     with lock:
         if not price_data:
             price_data.append(current_price)
-            time_data.append(now_kst().strftime("%H:%M"))
-
+            time_data.append(datetime.now().strftime("%H:%M"))
     threading.Thread(target=price_simulator, daemon=True).start()
-
+    threading.Thread(target=start_tunnel, daemon=True).start()
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-
 @app.route('/data')
 def get_data():
-    now = now_kst()
-    market_open = is_market_open(now)
     with lock:
         return jsonify({
             'timestamps': time_data,
             'prices': price_data,
-            'market_open': market_open
+            'market_open': is_market_open(datetime.now())
         })
 
-
 if __name__ == "__main__":
-    # Render는 PORT 환경변수를 사용하므로 이렇게 수정
     port = int(os.environ.get("PORT", 8080))
     app.run(debug=False, host='0.0.0.0', port=port)
