@@ -1,10 +1,15 @@
 from flask import Flask, render_template, jsonify
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 import threading
 import time
 import os
 import subprocess
+
+KST = 9
+def now_kst():
+    """한국 시간 기준 현재 시각 반환"""
+    return datetime.utcnow() + timedelta(hours=KST)
 
 app = Flask(__name__)
 
@@ -23,7 +28,7 @@ def is_market_open(now: datetime) -> bool:
 def price_simulator():
     global current_price, price_data, time_data
     while True:
-        now = datetime.now()
+        now = now_kst()
         if is_market_open(now):
             last_price = current_price
             # 가격 규칙
@@ -65,7 +70,7 @@ if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
     with lock:
         if not price_data:
             price_data.append(current_price)
-            time_data.append(datetime.now().strftime("%H:%M"))
+            time_data.append(now_kst().strftime("%H:%M"))
     threading.Thread(target=price_simulator, daemon=True).start()
     threading.Thread(target=start_tunnel, daemon=True).start()
 
